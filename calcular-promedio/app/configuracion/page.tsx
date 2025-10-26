@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from "@/src/supabaseClient";
-import "./login.css"; // 👈 Importamos los estilos
 
 export default function Configuracion() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
