@@ -1,51 +1,90 @@
-'use client';
-import { useState, useEffect } from 'react';
+"use client";
+import { useState } from "react";
 import { supabase } from "@/src/supabaseClient";
-import "./login.css"; // 👈 Importamos los estilos
+import "./login.css";
 
-export default function Configuracion() {
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+type Props = {
+  onLogin: (session: any) => void;
+  onClose: () => void;
+};
 
-  async function cargarUsuarios() {
-    const { data, error } = await supabase.from('usuarios').select('*');
-    if (error) console.error(error);
-    else setUsuarios(data);
-  }
+export default function LoginPage({ onLogin, onClose }: Props) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  async function eliminarUsuario(id: number) {
-    const confirmacion = confirm('¿Seguro que quieres eliminar este usuario?');
-    if (!confirmacion) return;
+  // Registrar usuario
+  const registrar = async () => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
-    const { error } = await supabase.from('usuarios').delete().eq('id', id);
-    if (error) alert('Error al eliminar');
-    else {
-      alert('Usuario eliminado');
-      cargarUsuarios(); // recargar la lista
+    if (error) {
+      alert("❌ Error al registrarse: " + error.message);
+      return;
     }
-  }
 
-  // ✅ usar useEffect para cargar usuarios al montar el componente
-  useEffect(() => {
-    cargarUsuarios();
-  }, []);
+    // ✅ Insertar también en la tabla "usuarios" usando el mismo UUID
+    const { error: insertError } = await supabase.from("usuarios").insert([
+      {
+        id: data.user?.id, // usa el mismo id del usuario auth
+        nombre: email.split("@")[0], // ejemplo: nombre tomado del correo
+        correo: email,
+      },
+    ]);
+
+    if (insertError) {
+      alert("⚠️ Usuario creado en Auth pero no en tabla usuarios: " + insertError.message);
+    } else {
+      alert("✅ Usuario registrado correctamente");
+    }
+  };
+
+  // Iniciar sesión
+  const iniciarSesion = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      alert("❌ Error al iniciar sesión: " + error.message);
+      return;
+    }
+    // devuelve la sesión y avisamos al padre
+    onLogin(data.session);
+  };
 
   return (
-    <main className="p-4">
-      <h1>⚙️ Configuración</h1>
-      <h2>Lista de usuarios</h2>
+    <div className="bg-white p-8 rounded-xl shadow-md w-80 flex flex-col items-center">
+      <h1 className="text-2xl font-bold mb-4 text-center">🔐 Registro / Login</h1>
 
-      {usuarios.length === 0 ? (
-        <p>No hay usuarios</p>
-      ) : (
-        <ul>
-          {usuarios.map((u) => (
-            <li key={u.id}>
-              {u.nombre}{' '}
-              <button onClick={() => eliminarUsuario(u.id)}>🗑 Eliminar</button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+      <input
+        className="border p-2 mb-2 rounded w-full"
+        placeholder="Correo electrónico"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        className="border p-2 mb-4 rounded w-full"
+        placeholder="Contraseña"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <div className="flex space-x-2 mb-4">
+        <button
+          onClick={registrar}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Registrar
+        </button>
+        <button
+          onClick={iniciarSesion}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Iniciar Sesión
+        </button>
+      </div>
+
+      <button onClick={onClose} className="text-gray-500 text-sm hover:text-gray-700">
+        Cerrar
+      </button>
+    </div>
   );
 }
