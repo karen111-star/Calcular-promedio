@@ -61,7 +61,7 @@ export default function CalcularPage() {
   return (
     <main className="pantalla p-6 text-center bg-blue-100 min-h-screen">
       <div className="encabezado flex justify-between items-center mb-6">
-        <h1 className="titulo text-2xl font-bold">🧮 Cálculo Rápido</h1>
+        <h1 className="titulo text-2xl font-bold">Cálculo Rápido</h1>
         <button
           onClick={guardarEnSupabase}
           className="boton-guardar bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
@@ -123,21 +123,21 @@ export default function CalcularPage() {
           className="btn bg-yellow-500 text-white px-4 py-2 rounded m-2"
           onClick={agregarNota}
         >
-          ➕ Agregar
+           + Agregar
         </button>
 
         <button
           className="btn bg-blue-500 text-white px-4 py-2 rounded m-2"
           onClick={calcularPromedio}
         >
-          🧮 Calcular
+           Calcular
         </button>
 
         <button
           className="btn bg-red-500 text-white px-4 py-2 rounded m-2"
           onClick={borrarNotas}
         >
-          🗑️ Borrar todo
+          Borrar todo
         </button>
       </div>
 
