@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabase } from "@/src/supabaseClient";
+import "./calcular.css";
 
 export default function CalcularPage() {
   const [asignatura, setAsignatura] = useState("");

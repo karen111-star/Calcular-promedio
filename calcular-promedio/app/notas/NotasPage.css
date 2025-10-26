@@ -1,0 +1,113 @@
+.notas-container {
+  background: #fff8e7;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+}
+
+.titulo-notas {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #2d3436;
+}
+
+.form-notas {
+  background: #ffffff;
+  padding: 1.5rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.form-notas input {
+  border: 2px solid #dfe6e9;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.5rem;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-notas input:focus {
+  border-color: #0984e3;
+}
+
+.form-notas button {
+  background: #0984e3;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.form-notas button:hover {
+  background: #74b9ff;
+}
+
+.lista-notas {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.nota-item {
+  background: #ffffff;
+  border-left: 5px solid #fdcb6e;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-nota p {
+  margin: 0.2rem 0;
+  color: #2d3436;
+}
+
+.btn-eliminar {
+  background: #d63031;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-eliminar:hover {
+  background: #ff7675;
+}
+
+.volver-container {
+  margin-top: 2rem;
+}
+
+.btn-volver {
+  background: #636e72;
+  color: white;
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  transition: background 0.3s;
+}
+
+.btn-volver:hover {
+  background: #b2bec3;
+}
+
+.sin-notas {
+  color: #636e72;
+  margin-top: 1rem;
+  font-style: italic;
+}

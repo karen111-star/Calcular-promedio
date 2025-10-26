@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { agregarNota, obtenerNotas, eliminarNota, Nota } from "@/src/notas";
+import "./NotasPage.css";
 
 export default function NotasPage() {
   const [notas, setNotas] = useState<Nota[]>([]);
@@ -9,7 +10,6 @@ export default function NotasPage() {
   const [notaValue, setNotaValue] = useState(0);
   const [porcentaje, setPorcentaje] = useState(0);
 
-  // Cargar las notas al iniciar
   useEffect(() => {
     cargarNotas();
   }, []);
@@ -51,66 +51,54 @@ export default function NotasPage() {
   };
 
   return (
-    <main className="p-8 bg-yellow-50 min-h-screen text-center">
-      <h1 className="text-2xl font-bold mb-6">📒 Mis Notas</h1>
+    <main className="notas-container">
+      <h1 className="titulo-notas">📒 Mis Notas</h1>
 
-      {/* Formulario para agregar nota */}
-      <div className="mb-6 bg-white shadow rounded p-4 inline-block">
+      {/* Formulario */}
+      <div className="form-notas">
         <input
           type="text"
           placeholder="Materia"
           value={materia}
           onChange={(e) => setMateria(e.target.value)}
-          className="border px-2 py-1 mr-2"
         />
         <input
           type="text"
           placeholder="Etiqueta"
           value={etiqueta}
           onChange={(e) => setEtiqueta(e.target.value)}
-          className="border px-2 py-1 mr-2"
         />
         <input
           type="number"
           placeholder="Nota"
           value={notaValue}
           onChange={(e) => setNotaValue(Number(e.target.value))}
-          className="border px-2 py-1 mr-2 w-20"
         />
         <input
           type="number"
           placeholder="Porcentaje"
           value={porcentaje}
           onChange={(e) => setPorcentaje(Number(e.target.value))}
-          className="border px-2 py-1 mr-2 w-20"
         />
-        <button
-          onClick={handleAgregarNota}
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-        >
-          ➕ Agregar
-        </button>
+        <button onClick={handleAgregarNota}>➕ Agregar</button>
       </div>
 
-      {/* Lista de notas */}
+      {/* Lista */}
       {notas.length === 0 ? (
-        <p>No hay notas guardadas todavía.</p>
+        <p className="sin-notas">No hay notas guardadas todavía.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="lista-notas">
           {notas.map((n) => (
-            <li
-              key={n.id}
-              className="bg-white shadow rounded p-4 flex justify-between items-center"
-            >
-              <span>
-                <strong>Materia:</strong> {n.materia} <br />
-                <strong>Etiqueta:</strong> {n.etiqueta} <br />
-                <strong>Nota:</strong> {n.nota} <br />
-                <strong>Porcentaje:</strong> {n.porcentaje}%
-              </span>
+            <li key={n.id} className="nota-item">
+              <div className="info-nota">
+                <p><strong>Materia:</strong> {n.materia}</p>
+                <p><strong>Etiqueta:</strong> {n.etiqueta}</p>
+                <p><strong>Nota:</strong> {n.nota}</p>
+                <p><strong>Porcentaje:</strong> {n.porcentaje}%</p>
+              </div>
               <button
                 onClick={() => handleEliminarNota(n.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                className="btn-eliminar"
               >
                 🗑️
               </button>
@@ -119,11 +107,8 @@ export default function NotasPage() {
         </ul>
       )}
 
-      <div className="mt-8">
-        <a
-          href="/"
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
+      <div className="volver-container">
+        <a href="/" className="btn-volver">
           ⬅️ Volver al inicio
         </a>
       </div>
