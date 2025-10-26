@@ -1,0 +1,32 @@
+.pestaña-principal {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.boton-cuadro {
+  width: 140px;
+  height: 140px;
+  border-radius: 16px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.boton-cuadro:hover {
+  transform: scale(1.05);
+}
+
+.rojo { background-color: #ef4444; }
+.amarillo { background-color: #facc15; }
+.azul { background-color: #3b82f6; }
+.verde { background-color: #22c55e; }
