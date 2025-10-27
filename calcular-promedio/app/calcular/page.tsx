@@ -1,192 +1,218 @@
 "use client";
-
-import React, { useState } from "react";
-import "./calcular.css";
-import Link from "next/link";
+import { useState } from "react";
 import { supabase } from "@/src/supabaseClient";
-import { crearMateria } from "@/src/materias";
+import "./calcular.css";
 
-export default function CalculoPage() {
+export default function CalcularPage() {
   const [asignatura, setAsignatura] = useState("");
-  const [filas, setFilas] = useState([{ nota: "", porcentaje: "", etiqueta: "" }]);
-  const [resultado, setResultado] = useState<number | null>(null);
-  const [mostrarEtiquetas, setMostrarEtiquetas] = useState(false);
+  const [notas, setNotas] = useState([
+    { etiqueta: "", valor: "", porcentaje: "" },
+  ]);
+  const [promedio, setPromedio] = useState<number | null>(null);
 
-  const agregarFila = () => {
-    setFilas([...filas, { nota: "", porcentaje: "", etiqueta: "" }]);
-  };
+  // 🔹 Calcular el promedio
+  const calcularPromedio = () => {
+    const notasNumericas = notas.map((n) => ({
+      valor: parseFloat(n.valor) || 0,
+      porcentaje: parseFloat(n.porcentaje) || 0,
+    }));
 
-  const eliminarFila = (index: number) => {
-    const nuevas = filas.filter((_, i) => i !== index);
-    setFilas(nuevas);
-  };
+    const totalPorcentaje = notasNumericas.reduce((a, n) => a + n.porcentaje, 0);
+    const total = notasNumericas.reduce(
+      (a, n) => a + n.valor * (n.porcentaje / 100),
+      0
+    );
 
-  const actualizarFila = (index: number, campo: string, valor: string) => {
-    const nuevas = [...filas];
-    nuevas[index] = { ...nuevas[index], [campo]: valor };
-    setFilas(nuevas);
-  };
-
-  // ✅ Calcular promedio y guardar en "materias"
-  const calcularPromedio = async () => {
-    let total = 0;
-    let sumaPesos = 0;
-
-    filas.forEach((fila) => {
-      const nota = parseFloat(fila.nota) || 0;
-      const peso = parseFloat(fila.porcentaje) || 0;
-      total += nota * peso;
-      sumaPesos += peso;
-    });
-
-    const promedio = sumaPesos > 0 ? total / sumaPesos : 0;
-    const redondeado = Number(promedio.toFixed(3));
-    setResultado(redondeado);
-
-    // ✅ Guardar promedio en tabla "materias"
-    try {
-      await crearMateria(null, asignatura || "Sin asignatura", redondeado);
-      console.log("Promedio guardado en materias");
-    } catch (error) {
-      console.error("Error al guardar promedio:", error);
+    if (isNaN(total) || isNaN(totalPorcentaje) || totalPorcentaje === 0) {
+      setPromedio(0);
+    } else {
+      setPromedio(parseFloat(total.toFixed(2)));
     }
   };
 
-  // ✅ Guardar cada nota en tabla "notas"
+  // 🔹 Agregar una nueva nota
+  const agregarNota = () =>
+    setNotas([...notas, { etiqueta: "", valor: "", porcentaje: "" }]);
+
+  // 🔹 Borrar todas las notas
+  const borrarNotas = () =>
+    setNotas([{ etiqueta: "", valor: "", porcentaje: "" }]);
+
+  // 🔹 Guardar notas y promedio en Supabase
   const guardarEnSupabase = async () => {
     try {
-      for (const fila of filas) {
-        const notaNum = parseFloat(fila.nota);
-        const porcentajeNum = parseFloat(fila.porcentaje);
-        if (!isNaN(notaNum) && !isNaN(porcentajeNum)) {
+      // 1️⃣ Guardar cada nota en la tabla "notas"
+      for (const n of notas) {
+        const valorNum = parseFloat(n.valor);
+        const porcentajeNum = parseFloat(n.porcentaje);
+        if (!isNaN(valorNum) && !isNaN(porcentajeNum)) {
           const { error } = await supabase.from("notas").insert([
             {
               materia: asignatura || "Sin asignatura",
-              etiqueta: fila.etiqueta || "Sin etiqueta",
-              nota: notaNum,
+              etiqueta: n.etiqueta || "Sin etiqueta",
+              nota: valorNum,
               porcentaje: porcentajeNum,
             },
           ]);
-          if (error) console.error("Error al guardar:", error.message);
+          if (error) console.error("❌ Error al guardar nota:", error.message);
         }
       }
-      alert("Notas guardadas correctamente");
+
+      // 2️⃣ Calcular el promedio final
+      const notasNumericas = notas.map((n) => ({
+        valor: parseFloat(n.valor) || 0,
+        porcentaje: parseFloat(n.porcentaje) || 0,
+      }));
+      const totalPorcentaje = notasNumericas.reduce(
+        (a, n) => a + n.porcentaje,
+        0
+      );
+      const total = notasNumericas.reduce(
+        (a, n) => a + n.valor * (n.porcentaje / 100),
+        0
+      );
+      const promedioFinal =
+        isNaN(total) || isNaN(totalPorcentaje) || totalPorcentaje === 0
+          ? 0
+          : parseFloat(total.toFixed(2));
+
+      // 3️⃣ Insertar o actualizar en la tabla "materias"
+      const nombreMateria = asignatura || "Sin asignatura";
+
+      const { data: existente, error: selectError } = await supabase
+        .from("materias")
+        .select("id")
+        .eq("materia", nombreMateria)
+        .maybeSingle();
+
+      if (selectError) {
+        console.error("❌ Error al verificar materia existente:", selectError.message);
+      }
+
+      if (existente) {
+        // Si ya existe, actualizar la nota_final
+        const { error: updateError } = await supabase
+          .from("materias")
+          .update({ nota_final: promedioFinal })
+          .eq("id", existente.id);
+        if (updateError)
+          console.error("❌ Error al actualizar materia:", updateError.message);
+      } else {
+        // Si no existe, insertar una nueva
+        const { error: insertError } = await supabase.from("materias").insert([
+          {
+            materia: nombreMateria,
+            nota_final: promedioFinal,
+          },
+        ]);
+        if (insertError)
+          console.error("❌ Error al insertar materia:", insertError.message);
+      }
+
+      alert(`✅ Notas y promedio guardados (${nombreMateria}: ${promedioFinal})`);
     } catch (err) {
-      console.error("Error general:", err);
+      console.error("⚠️ Error general:", err);
     }
   };
 
-  const borrarTodo = () => {
-    setAsignatura("");
-    setFilas([{ nota: "", porcentaje: "", etiqueta: "" }]);
-    setResultado(null);
-  };
-
+  // 🔹 Interfaz
   return (
-    <main className="contenedor">
-      <div className="barra-superior">
-        <div className="barra-top">
-          <Link href="/" className="volver">←</Link>
-          <div className="acciones-superior">
-            <span
-              className="guardar-emoji"
-              onClick={guardarEnSupabase}
-              title="Guardar notas"
-            >
-              💾
-            </span>
-            <Link href="/login" className="iniciar-sesion">Iniciar sesión</Link>
-          </div>
-        </div>
-        <h1 className="nota-final">{resultado !== null ? resultado : "0.00"}</h1>
+    <main className="pantalla p-6 text-center bg-blue-100 min-h-screen">
+      <div className="encabezado flex justify-between items-center mb-6">
+        <h1 className="titulo text-2xl font-bold">Cálculo Rápido</h1>
+        <button
+          onClick={guardarEnSupabase}
+          className="boton-guardar bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          title="Guardar notas"
+        >
+          💾
+        </button>
       </div>
 
-      <div className="asignatura">
-        <label>Asignatura:</label>
+      {/* Asignatura */}
+      <div className="mb-4">
         <input
-          type="text"
+          placeholder="Asignatura (opcional)"
+          className="entrada border p-2 rounded w-full"
           value={asignatura}
           onChange={(e) => setAsignatura(e.target.value)}
-          placeholder="Ej: Matemáticas"
         />
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Nota</th>
-            <th>Porcentaje (%)</th>
-            {mostrarEtiquetas && <th>Etiqueta</th>}
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {filas.map((fila, index) => (
-            <tr key={index}>
-              <td>
-                <input
-                  type="number"
-                  value={fila.nota}
-                  onChange={(e) => actualizarFila(index, "nota", e.target.value)}
-                  placeholder="0.0"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  value={fila.porcentaje}
-                  onChange={(e) => actualizarFila(index, "porcentaje", e.target.value)}
-                  placeholder="0.2"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                />
-              </td>
-              {mostrarEtiquetas && (
-                <td>
-                  <input
-                    type="text"
-                    value={fila.etiqueta}
-                    onChange={(e) => actualizarFila(index, "etiqueta", e.target.value)}
-                    placeholder="Ej: Parcial 1"
-                  />
-                </td>
-              )}
-              <td>
-                <button className="eliminar" onClick={() => eliminarFila(index)}>❌</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="barra-botones">
-        <button className="flotante" onClick={agregarFila}>➕</button>
-
-        <div className="botonera">
-          <div className="izquierda">
-            <label className="etiquetas-toggle">
-              <input
-                type="checkbox"
-                checked={mostrarEtiquetas}
-                onChange={(e) => setMostrarEtiquetas(e.target.checked)}
-              />
-              Etiquetas
-            </label>
-            <button className="borrar" onClick={borrarTodo}>BORRAR TODO</button>
-          </div>
-
-          <div className="derecha">
-            <button className="calcular-nota" onClick={calcularPromedio}>CALCULAR NOTA</button>
-            <button className="calcular" onClick={calcularPromedio}>CALCULAR</button>
-          </div>
+      {/* Campos para cada nota */}
+      {notas.map((n, i) => (
+        <div key={i} className="fila mb-4 border p-4 rounded bg-white shadow">
+          <input
+            placeholder="Etiqueta (ej. Parcial 1)"
+            className="entrada border p-2 m-1 rounded w-full"
+            value={n.etiqueta}
+            onChange={(e) => {
+              const copia = [...notas];
+              copia[i].etiqueta = e.target.value;
+              setNotas(copia);
+            }}
+          />
+          <input
+            placeholder="Nota"
+            className="entrada border p-2 m-1 rounded w-full"
+            value={n.valor}
+            onChange={(e) => {
+              const copia = [...notas];
+              copia[i].valor = e.target.value;
+              setNotas(copia);
+            }}
+          />
+          <input
+            placeholder="Porcentaje (%)"
+            className="entrada border p-2 m-1 rounded w-full"
+            value={n.porcentaje}
+            onChange={(e) => {
+              const copia = [...notas];
+              copia[i].porcentaje = e.target.value;
+              setNotas(copia);
+            }}
+          />
         </div>
+      ))}
+
+      {/* Botones */}
+      <div className="botones mt-4">
+        <button
+          className="btn bg-yellow-500 text-white px-4 py-2 rounded m-2"
+          onClick={agregarNota}
+        >
+          + Agregar
+        </button>
+
+        <button
+          className="btn bg-blue-500 text-white px-4 py-2 rounded m-2"
+          onClick={calcularPromedio}
+        >
+          Calcular
+        </button>
+
+        <button
+          className="btn bg-red-500 text-white px-4 py-2 rounded m-2"
+          onClick={borrarNotas}
+        >
+          Borrar todo
+        </button>
       </div>
 
-      <div className="barra-inferior"></div>
+      {/* Promedio final */}
+      {promedio !== null && (
+        <h2 className="resultado text-xl mt-6">Promedio Final: {promedio}</h2>
+      )}
+
+      {/* Volver */}
+      <div className="mt-8">
+        <a
+          href="/"
+          className="volver bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          ⬅️ Volver al inicio
+        </a>
+      </div>
     </main>
   );
 }
