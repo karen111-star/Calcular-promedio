@@ -1,6 +1,13 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { agregarNota, obtenerNotas, eliminarNota, Nota } from "@/src/notas";
+import {
+  agregarNota,
+  obtenerNotas,
+  eliminarNota,
+  Nota,
+} from "@/src/notas";
+import { obtenerMaterias } from "@/src/materias";
 import "./NotasPage.css";
 
 export default function NotasPage() {
@@ -9,9 +16,11 @@ export default function NotasPage() {
   const [etiqueta, setEtiqueta] = useState("");
   const [notaValue, setNotaValue] = useState(0);
   const [porcentaje, setPorcentaje] = useState(0);
+  const [materias, setMaterias] = useState<any[]>([]);
 
   useEffect(() => {
     cargarNotas();
+    cargarMaterias();
   }, []);
 
   const cargarNotas = async () => {
@@ -20,6 +29,15 @@ export default function NotasPage() {
       setNotas(data);
     } catch (error) {
       console.error("Error al obtener notas:", error);
+    }
+  };
+
+  const cargarMaterias = async () => {
+    try {
+      const data = await obtenerMaterias();
+      setMaterias(data);
+    } catch (error) {
+      console.error("Error al obtener materias:", error);
     }
   };
 
@@ -83,7 +101,7 @@ export default function NotasPage() {
         <button onClick={handleAgregarNota}>➕ Agregar</button>
       </div>
 
-      {/* Lista */}
+      {/* Lista de notas */}
       {notas.length === 0 ? (
         <p className="sin-notas">No hay notas guardadas todavía.</p>
       ) : (
@@ -107,10 +125,26 @@ export default function NotasPage() {
         </ul>
       )}
 
+      {/* Promedios finales */}
+      <h2 className="titulo-notas">📘 Promedios Finales</h2>
+      {materias.length === 0 ? (
+        <p className="sin-notas">No hay promedios guardados todavía.</p>
+      ) : (
+        <ul className="lista-notas">
+          {materias.map((m) => (
+            <li key={m.id} className="nota-item">
+              <div className="info-nota">
+                <p><strong>Materia:</strong> {m.materia}</p>
+                <p><strong>Nota final:</strong> {m.nota_final}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Botón volver */}
       <div className="volver-container">
-        <a href="/" className="btn-volver">
-          ⬅️ Volver al inicio
-        </a>
+        <a href="/" className="btn-volver">⬅️ Volver al inicio</a>
       </div>
     </main>
   );

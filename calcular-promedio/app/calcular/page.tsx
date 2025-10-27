@@ -1,160 +1,153 @@
 "use client";
-import { useState } from "react";
-import { supabase } from "@/src/supabaseClient";
+
+import React, { useState } from "react";
 import "./calcular.css";
+import Link from "next/link";
 
-export default function CalcularPage() {
+export default function CalculoPage() {
   const [asignatura, setAsignatura] = useState("");
-  const [notas, setNotas] = useState([
-    { etiqueta: "", valor: "", porcentaje: "" },
-  ]);
-  const [promedio, setPromedio] = useState<number | null>(null);
+  const [filas, setFilas] = useState([{ nota: "", porcentaje: "", etiqueta: "" }]);
+  const [resultado, setResultado] = useState<number | null>(null);
+  const [mostrarEtiquetas, setMostrarEtiquetas] = useState(false);
 
-  const calcularPromedio = () => {
-    const notasNumericas = notas.map((n) => ({
-      valor: parseFloat(n.valor) || 0,
-      porcentaje: parseFloat(n.porcentaje) || 0,
-    }));
-
-    const totalPorcentaje = notasNumericas.reduce((a, n) => a + n.porcentaje, 0);
-    const total = notasNumericas.reduce(
-      (a, n) => a + n.valor * (n.porcentaje / 100),
-      0
-    );
-
-    if (isNaN(total) || isNaN(totalPorcentaje) || totalPorcentaje === 0) {
-      setPromedio(0);
-    } else {
-      setPromedio(parseFloat(total.toFixed(2)));
-    }
+  const agregarFila = () => {
+    setFilas([...filas, { nota: "", porcentaje: "", etiqueta: "" }]);
   };
 
-  const agregarNota = () =>
-    setNotas([...notas, { etiqueta: "", valor: "", porcentaje: "" }]);
+  const eliminarFila = (index: number) => {
+    const nuevas = filas.filter((_, i) => i !== index);
+    setFilas(nuevas);
+  };
 
-  const borrarNotas = () =>
-    setNotas([{ etiqueta: "", valor: "", porcentaje: "" }]);
+  const calcularPromedio = () => {
+    let total = 0;
+    let sumaPesos = 0;
 
-  const guardarEnSupabase = async () => {
-    try {
-      for (const n of notas) {
-        const valorNum = parseFloat(n.valor);
-        const porcentajeNum = parseFloat(n.porcentaje);
-        if (!isNaN(valorNum) && !isNaN(porcentajeNum)) {
-          const { error } = await supabase.from("notas").insert([
-            {
-              materia: asignatura || "Sin asignatura",
-              etiqueta: n.etiqueta || "Sin etiqueta",
-              nota: valorNum,
-              porcentaje: porcentajeNum,
-            },
-          ]);
-          if (error) console.error("Error al guardar:", error.message);
-        }
-      }
-      alert("Notas guardadas correctamente");
-    } catch (err) {
-      console.error("Error general:", err);
-    }
+    filas.forEach((fila) => {
+      const nota = parseFloat(fila.nota) || 0;
+      const peso = parseFloat(fila.porcentaje) || 0;
+      total += nota * peso;
+      sumaPesos += peso;
+    });
+
+    const promedio = sumaPesos > 0 ? total / sumaPesos : 0;
+    setResultado(Number(promedio.toFixed(3)));
+  };
+
+  const borrarTodo = () => {
+    setAsignatura("");
+    setFilas([{ nota: "", porcentaje: "", etiqueta: "" }]);
+    setResultado(null);
+  };
+
+  const actualizarFila = (index: number, campo: string, valor: string) => {
+    const nuevas = [...filas];
+    nuevas[index] = { ...nuevas[index], [campo]: valor };
+    setFilas(nuevas);
   };
 
   return (
-    <main className="pantalla p-6 text-center bg-blue-100 min-h-screen">
-      <div className="encabezado flex justify-between items-center mb-6">
-        <h1 className="titulo text-2xl font-bold">Cálculo Rápido</h1>
-        <button
-          onClick={guardarEnSupabase}
-          className="boton-guardar bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          title="Guardar notas"
-        >
-          💾
-        </button>
+    <main className="contenedor">
+      <div className="barra-superior">
+        <div className="barra-top">
+          <Link href="/" className="volver">←</Link>
+          <div className="acciones-superior">
+            <Link href="/login" className="iniciar-sesion">Iniciar sesión</Link>
+            <Link href="/guardar" className="guardar">
+              <img src="/icons/guardar.png" alt="Guardar" className="icono" />
+              Guardar
+            </Link>
+          </div>
+        </div>
+        <h1 className="nota-final">{resultado !== null ? resultado : "0.00"}</h1>
       </div>
 
-      {/* Asignatura */}
-      <div className="mb-4">
+      <div className="asignatura">
+        <label>Asignatura:</label>
         <input
-          placeholder="Asignatura (opcional)"
-          className="entrada border p-2 rounded w-full"
+          type="text"
           value={asignatura}
           onChange={(e) => setAsignatura(e.target.value)}
+          placeholder="Ej: Matemáticas"
         />
       </div>
 
-      {/* Campos para cada nota */}
-      {notas.map((n, i) => (
-        <div key={i} className="fila mb-4 border p-4 rounded bg-white shadow">
-          <input
-            placeholder="Etiqueta (ej. Parcial 1)"
-            className="entrada border p-2 m-1 rounded w-full"
-            value={n.etiqueta}
-            onChange={(e) => {
-              const copia = [...notas];
-              copia[i].etiqueta = e.target.value;
-              setNotas(copia);
-            }}
-          />
-          <input
-            placeholder="Nota"
-            className="entrada border p-2 m-1 rounded w-full"
-            value={n.valor}
-            onChange={(e) => {
-              const copia = [...notas];
-              copia[i].valor = e.target.value;
-              setNotas(copia);
-            }}
-          />
-          <input
-            placeholder="Porcentaje (%)"
-            className="entrada border p-2 m-1 rounded w-full"
-            value={n.porcentaje}
-            onChange={(e) => {
-              const copia = [...notas];
-              copia[i].porcentaje = e.target.value;
-              setNotas(copia);
-            }}
-          />
+      <table>
+        <thead>
+          <tr>
+            <th>Nota</th>
+            <th>Porcentaje (%)</th>
+            {mostrarEtiquetas && <th>Etiqueta</th>}
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map((fila, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  type="number"
+                  value={fila.nota}
+                  onChange={(e) => actualizarFila(index, "nota", e.target.value)}
+                  placeholder="0.0"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={fila.porcentaje}
+                  onChange={(e) => actualizarFila(index, "porcentaje", e.target.value)}
+                  placeholder="0.2"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                />
+              </td>
+              {mostrarEtiquetas && (
+                <td>
+                  <input
+                    type="text"
+                    value={fila.etiqueta}
+                    onChange={(e) => actualizarFila(index, "etiqueta", e.target.value)}
+                    placeholder="Ej: Parcial 1"
+                  />
+                </td>
+              )}
+              <td>
+                <button className="eliminar" onClick={() => eliminarFila(index)}>❌</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="barra-botones">
+        <button className="flotante" onClick={agregarFila}>➕</button>
+
+        <div className="botonera">
+          <div className="izquierda">
+            <label className="etiquetas-toggle">
+              <input
+                type="checkbox"
+                checked={mostrarEtiquetas}
+                onChange={(e) => setMostrarEtiquetas(e.target.checked)}
+              />
+              Etiquetas
+            </label>
+            <button className="borrar" onClick={borrarTodo}>BORRAR TODO</button>
+          </div>
+
+          <div className="derecha">
+            <button className="calcular-nota" onClick={calcularPromedio}>CALCULAR NOTA</button>
+            <button className="calcular" onClick={calcularPromedio}>CALCULAR</button>
+          </div>
         </div>
-      ))}
-
-      {/* Botones */}
-      <div className="botones mt-4">
-        <button
-          className="btn bg-yellow-500 text-white px-4 py-2 rounded m-2"
-          onClick={agregarNota}
-        >
-           + Agregar
-        </button>
-
-        <button
-          className="btn bg-blue-500 text-white px-4 py-2 rounded m-2"
-          onClick={calcularPromedio}
-        >
-           Calcular
-        </button>
-
-        <button
-          className="btn bg-red-500 text-white px-4 py-2 rounded m-2"
-          onClick={borrarNotas}
-        >
-          Borrar todo
-        </button>
       </div>
 
-      {/* Promedio final */}
-      {promedio !== null && (
-        <h2 className="resultado text-xl mt-6">Promedio Final: {promedio}</h2>
-      )}
-
-      {/* Volver */}
-      <div className="mt-8">
-        <a
-          href="/"
-          className="volver bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          ⬅️ Volver al inicio
-        </a>
-      </div>
+      <div className="barra-inferior"></div>
     </main>
   );
 }
