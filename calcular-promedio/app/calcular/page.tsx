@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import "./calcular.css";
 import Link from "next/link";
+import { supabase } from "@/src/supabaseClient";
+import { crearMateria } from "@/src/materias";
 
 export default function CalculoPage() {
   const [asignatura, setAsignatura] = useState("");
@@ -19,7 +21,14 @@ export default function CalculoPage() {
     setFilas(nuevas);
   };
 
-  const calcularPromedio = () => {
+  const actualizarFila = (index: number, campo: string, valor: string) => {
+    const nuevas = [...filas];
+    nuevas[index] = { ...nuevas[index], [campo]: valor };
+    setFilas(nuevas);
+  };
+
+  // ✅ Calcular promedio y guardar en "materias"
+  const calcularPromedio = async () => {
     let total = 0;
     let sumaPesos = 0;
 
@@ -31,7 +40,40 @@ export default function CalculoPage() {
     });
 
     const promedio = sumaPesos > 0 ? total / sumaPesos : 0;
-    setResultado(Number(promedio.toFixed(3)));
+    const redondeado = Number(promedio.toFixed(3));
+    setResultado(redondeado);
+
+    // ✅ Guardar promedio en tabla "materias"
+    try {
+      await crearMateria(null, asignatura || "Sin asignatura", redondeado);
+      console.log("Promedio guardado en materias");
+    } catch (error) {
+      console.error("Error al guardar promedio:", error);
+    }
+  };
+
+  // ✅ Guardar cada nota en tabla "notas"
+  const guardarEnSupabase = async () => {
+    try {
+      for (const fila of filas) {
+        const notaNum = parseFloat(fila.nota);
+        const porcentajeNum = parseFloat(fila.porcentaje);
+        if (!isNaN(notaNum) && !isNaN(porcentajeNum)) {
+          const { error } = await supabase.from("notas").insert([
+            {
+              materia: asignatura || "Sin asignatura",
+              etiqueta: fila.etiqueta || "Sin etiqueta",
+              nota: notaNum,
+              porcentaje: porcentajeNum,
+            },
+          ]);
+          if (error) console.error("Error al guardar:", error.message);
+        }
+      }
+      alert("Notas guardadas correctamente");
+    } catch (err) {
+      console.error("Error general:", err);
+    }
   };
 
   const borrarTodo = () => {
@@ -40,23 +82,20 @@ export default function CalculoPage() {
     setResultado(null);
   };
 
-  const actualizarFila = (index: number, campo: string, valor: string) => {
-    const nuevas = [...filas];
-    nuevas[index] = { ...nuevas[index], [campo]: valor };
-    setFilas(nuevas);
-  };
-
   return (
     <main className="contenedor">
       <div className="barra-superior">
         <div className="barra-top">
           <Link href="/" className="volver">←</Link>
           <div className="acciones-superior">
+            <span
+              className="guardar-emoji"
+              onClick={guardarEnSupabase}
+              title="Guardar notas"
+            >
+              💾
+            </span>
             <Link href="/login" className="iniciar-sesion">Iniciar sesión</Link>
-            <Link href="/guardar" className="guardar">
-              <img src="/icons/guardar.png" alt="Guardar" className="icono" />
-              Guardar
-            </Link>
           </div>
         </div>
         <h1 className="nota-final">{resultado !== null ? resultado : "0.00"}</h1>
