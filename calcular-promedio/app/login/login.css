@@ -1,75 +1,92 @@
 
 .login-container {
-  min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1e3a8a, #4338ca);
-  padding: 1rem;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to bottom right, #dbeafe, #eff6ff);
 }
+
 
 .login-box {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 400px;
+  background-color: #fff;
   padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  text-align: center;
 }
 
-.login-title {
-  text-align: center;
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #3730a3;
+.login-box h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e3a8a;
   margin-bottom: 1.5rem;
 }
 
-.login-input {
+
+.login-box input {
+  display: block;
   width: 100%;
-  border: 1px solid #d1d5db;
-  padding: 0.75rem;
+  padding: 0.6rem;
   margin-bottom: 1rem;
+  border: 1px solid #cbd5e1;
   border-radius: 0.5rem;
   font-size: 1rem;
   outline: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
 }
 
-.login-input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 4px rgba(99, 102, 241, 0.5);
+.login-box input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
 }
 
-.login-buttons {
+
+.button-group {
   display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1rem;
 }
 
-.btn {
-  flex: 1;
-  color: #fff;
-  font-weight: 600;
+.btn-registrar,
+.btn-login {
+  padding: 0.5rem 1rem;
   border: none;
-  padding: 0.6rem;
   border-radius: 0.5rem;
+  color: white;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.btn-register {
-  background: #22c55e;
+.btn-registrar {
+  background-color: #16a34a;
 }
 
-.btn-register:hover {
-  background: #16a34a;
+.btn-registrar:hover {
+  background-color: #15803d;
 }
 
 .btn-login {
-  background: #3b82f6;
+  background-color: #2563eb;
 }
 
 .btn-login:hover {
-  background: #2563eb;
+  background-color: #1d4ed8;
+}
+
+
+.btn-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-close:hover {
+  color: #111827;
 }

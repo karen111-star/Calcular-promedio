@@ -1,0 +1,70 @@
+
+.configuracion {
+  background: #f9fafb;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  color: #1f2937;
+}
+
+/* Encabezado */
+.configuracion h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+}
+
+.configuracion h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2563eb;
+}
+
+/* Lista de usuarios */
+.configuracion ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.configuracion li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.configuracion li:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón eliminar */
+.configuracion button {
+  background-color: #ef4444;
+  border: none;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.configuracion button:hover {
+  background-color: #dc2626;
+}
+
+/* Texto sin usuarios */
+.configuracion p {
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 1rem;
+}

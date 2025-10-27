@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from "@/src/supabaseClient";
+import './Configuracion.css'; // 👈 Importa los estilos aquí
 
 export default function Configuracion() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -19,17 +20,16 @@ export default function Configuracion() {
     if (error) alert('Error al eliminar');
     else {
       alert('Usuario eliminado');
-      cargarUsuarios(); // recargar la lista
+      cargarUsuarios();
     }
   }
 
-  // ✅ usar useEffect para cargar usuarios al montar el componente
   useEffect(() => {
     cargarUsuarios();
   }, []);
 
   return (
-    <main className="p-4">
+    <main className="configuracion">
       <h1>⚙️ Configuración</h1>
       <h2>Lista de usuarios</h2>
 
