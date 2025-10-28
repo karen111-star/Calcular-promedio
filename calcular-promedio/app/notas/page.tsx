@@ -1,21 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  agregarNota,
-  obtenerNotas,
-  eliminarNota,
-  Nota,
-} from "@/src/notas";
+import { obtenerNotas, eliminarNota, Nota } from "@/src/notas";
 import { obtenerMaterias } from "@/src/materias";
 import "./NotasPage.css";
 
 export default function NotasPage() {
   const [notas, setNotas] = useState<Nota[]>([]);
-  const [materia, setMateria] = useState("");
-  const [etiqueta, setEtiqueta] = useState("");
-  const [notaValue, setNotaValue] = useState(0);
-  const [porcentaje, setPorcentaje] = useState(0);
   const [materias, setMaterias] = useState<any[]>([]);
 
   useEffect(() => {
@@ -41,23 +32,6 @@ export default function NotasPage() {
     }
   };
 
-  const handleAgregarNota = async () => {
-    if (!materia || !etiqueta) {
-      alert("Debes completar materia y etiqueta");
-      return;
-    }
-    try {
-      await agregarNota(materia, etiqueta, notaValue, porcentaje);
-      await cargarNotas();
-      setMateria("");
-      setEtiqueta("");
-      setNotaValue(0);
-      setPorcentaje(0);
-    } catch (error) {
-      console.error("Error al agregar nota:", error);
-    }
-  };
-
   const handleEliminarNota = async (id?: number) => {
     if (!id) return;
     try {
@@ -68,78 +42,65 @@ export default function NotasPage() {
     }
   };
 
+  // 🔹 Agrupar las notas por materia
+  const notasPorMateria = notas.reduce((acc, nota) => {
+    if (!acc[nota.materia]) acc[nota.materia] = [];
+    acc[nota.materia].push(nota);
+    return acc;
+  }, {} as Record<string, Nota[]>);
+
   return (
     <main className="notas-container">
       <h1 className="titulo-notas">📒 Mis Notas</h1>
 
-      {/* Formulario */}
-      <div className="form-notas">
-        <input
-          type="text"
-          placeholder="Materia"
-          value={materia}
-          onChange={(e) => setMateria(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Etiqueta"
-          value={etiqueta}
-          onChange={(e) => setEtiqueta(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Nota"
-          value={notaValue}
-          onChange={(e) => setNotaValue(Number(e.target.value))}
-        />
-        <input
-          type="number"
-          placeholder="Porcentaje"
-          value={porcentaje}
-          onChange={(e) => setPorcentaje(Number(e.target.value))}
-        />
-        <button onClick={handleAgregarNota}>➕ Agregar</button>
-      </div>
-
-      {/* Lista de notas */}
-      {notas.length === 0 ? (
+      {Object.keys(notasPorMateria).length === 0 ? (
         <p className="sin-notas">No hay notas guardadas todavía.</p>
       ) : (
-        <ul className="lista-notas">
-          {notas.map((n) => (
-            <li key={n.id} className="nota-item">
-              <div className="info-nota">
-                <p><strong>Materia:</strong> {n.materia}</p>
-                <p><strong>Etiqueta:</strong> {n.etiqueta}</p>
-                <p><strong>Nota:</strong> {n.nota}</p>
-                <p><strong>Porcentaje:</strong> {n.porcentaje}%</p>
-              </div>
-              <button
-                onClick={() => handleEliminarNota(n.id)}
-                className="btn-eliminar"
-              >
-                🗑️
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+        Object.keys(notasPorMateria).map((materia) => {
+          const notasMateria = notasPorMateria[materia];
+          const promedioMateria = materias.find(
+            (m) => m.materia === materia
+          );
 
-      {/* Promedios finales */}
-      <h2 className="titulo-notas">📘 Promedios Finales</h2>
-      {materias.length === 0 ? (
-        <p className="sin-notas">No hay promedios guardados todavía.</p>
-      ) : (
-        <ul className="lista-notas">
-          {materias.map((m) => (
-            <li key={m.id} className="nota-item">
-              <div className="info-nota">
-                <p><strong>Materia:</strong> {m.materia}</p>
-                <p><strong>Nota final:</strong> {m.nota_final}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+          return (
+            <div key={materia} className="materia-card">
+              <h2 className="materia-nombre">{materia}</h2>
+              <table className="tabla-notas">
+                <thead>
+                  <tr>
+                    <th>Etiqueta</th>
+                    <th>Nota</th>
+                    <th>Porcentaje</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notasMateria.map((n) => (
+                    <tr key={n.id}>
+                      <td>{n.etiqueta}</td>
+                      <td>{n.nota}</td>
+                      <td>{n.porcentaje}%</td>
+                      <td>
+                        <button
+                          onClick={() => handleEliminarNota(n.id)}
+                          className="btn-eliminar"
+                        >
+                          ❌
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* 🔹 Mostrar nota final debajo de la tabla */}
+              <p className="nota-final-texto">
+                <strong>Nota Final:</strong>{" "}
+                {promedioMateria ? promedioMateria.nota_final.toFixed(2) : "0.00"}
+              </p>
+            </div>
+          );
+        })
       )}
 
       {/* Botón volver */}
