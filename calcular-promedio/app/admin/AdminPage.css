@@ -1,0 +1,94 @@
+/* === app/admin/AdminPage.css === */
+
+.admin-container {
+  min-height: 100vh;
+  background: #f5f7fb;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  color: #333;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #004186;
+  text-align: center;
+}
+
+.admin-table {
+  width: 100%;
+  max-width: 900px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.admin-table thead {
+  background: #004186;
+  color: white;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-table tr:hover {
+  background-color: #f1f5ff;
+}
+
+.admin-table th:first-child,
+.admin-table td:first-child {
+  border-left: none;
+}
+
+.admin-table th:last-child,
+.admin-table td:last-child {
+  border-right: none;
+}
+
+.admin-footer {
+  margin-top: 2rem;
+  color: #666;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Botón de cerrar sesión */
+.logout-btn {
+  margin-top: 1.5rem;
+  background: #004186;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease-in-out;
+}
+
+.logout-btn:hover {
+  background: #002b5b;
+}
+
+/* Responsivo */
+@media (max-width: 700px) {
+  .admin-table th,
+  .admin-table td {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+  }
+
+  .admin-title {
+    font-size: 1.5rem;
+  }
+}
