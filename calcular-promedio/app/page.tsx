@@ -1,21 +1,30 @@
 "use client";
-import "./Home.css"; 
+import "./Home.css";
 
 export default function Home() {
   return (
     <main className="pestaña-principal">
-      <a href="/calcular" className="boton-cuadro rojo">
-        🧮<br />Cálculo Rápido
-      </a>
-      <a href="/notas" className="boton-cuadro amarillo">
-        💾<br />Mis Notas
-      </a>
-      <a href="/configuracion" className="boton-cuadro azul">
-        ⚙️<br />Configuración
-      </a>
-      <a href="/login" className="boton-cuadro verde">
-        🚪<br />Salir
-      </a>
+      <div className="botones-grid">
+        <a href="/calcular" className="boton-cuadro">
+          <div className="icono-circulo rojo">🧮</div>
+          <span>Cálculo Rápido</span>
+        </a>
+
+        <a href="/notas" className="boton-cuadro">
+          <div className="icono-circulo amarillo">📒</div>
+          <span>Mis Notas</span>
+        </a>
+
+        <a href="/configuracion" className="boton-cuadro">
+          <div className="icono-circulo azul">⚙️</div>
+          <span>Configuración</span>
+        </a>
+
+        <a href="/login" className="boton-cuadro">
+          <div className="icono-circulo verde">🚪</div>
+          <span>Salir</span>
+        </a>
+      </div>
     </main>
   );
 }
